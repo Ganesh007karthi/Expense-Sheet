@@ -89,7 +89,6 @@ function Homepage(props) {
           </Button>
         </div>
       </div>
-
       <Paper className={classes.expenseform} elevation={3}>
         <form
           className={classes.form}
@@ -167,15 +166,9 @@ function Homepage(props) {
 
   async function submitform() {
     try {
-      console.log(amount);
-      console.log(description);
-      console.log(selectedDate);
-      console.log(amountType);
       var timestamp = Math.round(selectedDate.getTime() / 1000);
       var userid = fire.auth().currentUser.uid;
       var today = new Date();
-      console.log(today)
-      console.log(userid);
       var data = {
         amountType: amountType,
         amount: amount,
@@ -188,7 +181,6 @@ function Homepage(props) {
       };
       await fire.firestore().collection("data").add(data);
       alert("Your Expense Data is added Successfully!")
-      console.log(data);
       props.history.replace("/");
     } catch (error) {
       alert(error.message);

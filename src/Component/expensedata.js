@@ -119,7 +119,6 @@ function ExpenseData(props) {
       var datestring = month + " " + date.getDate() + ", " + date.getFullYear();
       var today = new Date(datestring);
       filter();
-      console.log(selectedDate);
       const unsubscribe = fire
         .firestore()
         .collection("data")
@@ -131,7 +130,6 @@ function ExpenseData(props) {
             id: doc.id,
             ...doc.data(),
           }));
-          console.log(alldata);
           setdata(alldata);
           setalldata(alldata);
           setfetched(true);
@@ -146,30 +144,14 @@ function ExpenseData(props) {
   };
 
   async function deletedata(id, userid, data1) {
-    // await fire.firestore().collection('data').doc(id).delete()
-    console.log(data1.isDeleted);
     data1.isDeleted = 1;
     await fire.firestore().collection("data").doc(id).update(data1);
-    // var unsubscribe = fire
-    //   .firestore()
-    //   .collection("data")
-    //   .where("userId", "==", userid)
-    //   .where("isDeleted", "==", 0)
-    //   .onSnapshot((snapshot) => {
-    //     const alldata = snapshot.docs.map((doc) => ({
-    //       id: doc.id,
-    //       ...doc.data(),
-    //     }));
-    //     console.log(alldata);
-    //     setdata(alldata);
-    //   });
     filter();
     alert("deleted");
   }
   async function update(id, onservercreatedAt, userid) {
     var testdata = [];
     setdata(testdata);
-    console.log(id);
     setOpen(false);
 
     var data = {
@@ -183,23 +165,8 @@ function ExpenseData(props) {
       isDeleted: 0,
     };
     await fire.firestore().collection("data").doc(id).update(data);
-
-    // var unsubscribe = fire
-    //   .firestore()
-    //   .collection("data")
-    //   .where("userId", "==", userid)
-    //   .where("isDeleted", "==", 0)
-    //   .onSnapshot((snapshot) => {
-    //     const alldata = snapshot.docs.map((doc) => ({
-    //       id: doc.id,
-    //       ...doc.data(),
-    //     }));
-    //     console.log(alldata);
-    //     setdata(alldata);
-    //   });
     filter();
     alert("updated");
-    console.log(data);
   }
   const handleClose = () => {
     setOpen(false);
@@ -262,7 +229,6 @@ function ExpenseData(props) {
       var datestring =
         month + " " + (date.getDate() - 7) + ", " + date.getFullYear();
       var today = new Date(datestring);
-      console.log(today);
       const unsubscribe = fire
         .firestore()
         .collection("data")
@@ -288,7 +254,6 @@ function ExpenseData(props) {
       var datestring =
         month + " " + (date.getDate() - 40) + ", " + date.getFullYear();
       var today = new Date(datestring);
-      console.log(previousmonth);
       const unsubscribe = fire
         .firestore()
         .collection("data")
@@ -308,17 +273,13 @@ function ExpenseData(props) {
   }
 
   async function totalCredit(alldata) {
-    console.log(alldata.length);
-    console.log(typeof alldata);
     var totalcredit = 0;
     alldata.map((eachdata) => {
-      console.log(eachdata.amountType);
       if (eachdata.amountType == "Credit") {
         if (eachdata.amount.indexOf(".") > -1) {
         } else {
           var amount = parseInt(eachdata.amount);
           totalcredit = totalcredit + amount;
-          console.log(amount);
         }
       }
     });
@@ -327,23 +288,16 @@ function ExpenseData(props) {
   async function totalDebit(alldata) {
     var totaldebit = 0;
     alldata.map((eachdata) => {
-      console.log(eachdata.amountType);
       if (eachdata.amountType == "Debit") {
         if (eachdata.amount.indexOf(".") > -1) {
         } else {
           var amount = parseInt(eachdata.amount);
           totaldebit = totaldebit + amount;
-          console.log(amount);
         }
       }
     });
-    console.log(data.length);
-    console.log(totaldebit);
     settotalalldebit(totaldebit);
   }
-
-  console.log(totalallcredit);
-  console.log(data);
   return fetched ? (
     <div className={classes.root}>
       <div>
@@ -384,7 +338,9 @@ function ExpenseData(props) {
                     <Typography
                       className={classes.title}
                       color="Primary"
-                      gutterBottom variant="h5" component="h4">
+                      gutterBottom
+                      variant="h5"
+                      component="h4">
                       Total Credit
                     </Typography>
                     <Typography variant="h5" component="h2" color="Primary">
@@ -402,7 +358,10 @@ function ExpenseData(props) {
                       gutterBottom>
                       Total Debit
                     </Typography>
-                    <Typography variant="h5" component="h2" color="textSecondary">
+                    <Typography
+                      variant="h5"
+                      component="h2"
+                      color="textSecondary">
                       Rs.{totalalldebit}
                     </Typography>
                   </CardContent>

@@ -55,7 +55,6 @@ function Login(props) {
       <Typography component="h1" variant="h4">
         Expense Sheet
       </Typography>
-
       <Paper className={classes.login} elevation={3}>
         <Typography component="h1" variant="h5">
           Sign in
@@ -119,7 +118,6 @@ function Login(props) {
 
   async function login() {
     try {
-      console.log("insige login function");
       await fire.auth().signInWithEmailAndPassword(email, password);
       props.history.replace("/");
     } catch (error) {
