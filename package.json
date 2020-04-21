@@ -2,6 +2,10 @@
   "name": "react-firebase-auth",
   "version": "0.1.0",
   "private": true,
+  "engines": {
+    "node": "12.16.x",
+    "npm": "6.x"
+  },
   "dependencies": {
     "@material-ui/core": "^4.9.10",
     "@material-ui/icons": "^4.9.1",
