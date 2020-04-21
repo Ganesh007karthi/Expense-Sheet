@@ -166,7 +166,6 @@ function Homepage(props) {
 
   async function submitform() {
     try {
-      var timestamp = Math.round(selectedDate.getTime() / 1000);
       var userid = fire.auth().currentUser.uid;
       var today = new Date();
       var data = {
