@@ -118,32 +118,32 @@ function ExpenseData(props) {
   const [deleteid, setdeleteid] = useState("");
 
   useEffect(() => {
-    if (fire.auth().onAuthStateChanged) {
-      const userid = fire.auth().currentUser.uid;
-      var options = { month: "long" };
-      var date = new Date();
-      var month = new Intl.DateTimeFormat("en-US", options).format(date);
-      var datestring = month + " " + date.getDate() + ", " + date.getFullYear();
-      var today = new Date(datestring);
-      filter();
-      const unsubscribe = fire
-        .firestore()
-        .collection("data")
-        .where("userId", "==", userid)
-        .where("isDeleted", "==", 0)
-        .where("createdAt", ">", today)
-        .onSnapshot((snapshot) => {
-          const alldatatoday = snapshot.docs.map((doc) => ({
-            id: doc.id,
-            ...doc.data(),
-          }));
-          let sorteddata = alldatatoday
-            .slice()
-            .sort((a, b) => b.createdAt - a.createdAt);
-          setdata(sorteddata);
-          setfetched(true);
-        });
-    }
+    const userid = fire.auth().currentUser.uid;
+    var options = { month: "long" };
+    var date = new Date();
+    var month = new Intl.DateTimeFormat("en-US", options).format(date);
+    var datestring = month + " " + date.getDate() + ", " + date.getFullYear();
+    var today = new Date(datestring);
+    filter();
+    const unsubscribe = fire
+      .firestore()
+      .collection("data")
+      .where("userId", "==", userid)
+      .where("isDeleted", "==", 0)
+      .onSnapshot((snapshot) => {
+        var alldatatoday = snapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
+        let sorteddata = alldatatoday
+          .slice()
+          .sort((a, b) => b.createdAt - a.createdAt);
+        setdata(sorteddata);
+        setfetched(true);
+        totalCredit(alldatatoday);
+        totalDebit(alldatatoday);
+      });
+
     totalCredit(data);
     totalDebit(data);
     filter();
@@ -286,15 +286,24 @@ function ExpenseData(props) {
     if (filterby === "7 days ago") {
       var options = { month: "long" };
       var date = new Date();
+      var previousmonth = new Date();
+      previousmonth.setDate(previousmonth.getDate() - 7);
       var month = new Intl.DateTimeFormat("en-US", options).format(date);
       var datestring =
-        month + " " + (date.getDate() - 7) + ", " + date.getFullYear();
+        previousmonth.getMonth() +
+        1 +
+        " " +
+        previousmonth.getDate() +
+        ", " +
+        previousmonth.getFullYear();
+
       var today = new Date(datestring);
       await fire
         .firestore()
         .collection("data")
         .where("userId", "==", userid)
         .where("isDeleted", "==", 0)
+        .where("createdAt", ">=", today)
         .onSnapshot((snapshot) => {
           var alldatatoday = snapshot.docs.map((doc) => ({
             id: doc.id,
@@ -315,18 +324,27 @@ function ExpenseData(props) {
       previousmonth.setDate(previousmonth.getDate() - 30);
       var month = new Intl.DateTimeFormat("en-US", options).format(date);
       var datestring =
-        month + " " + (date.getDate() - 40) + ", " + date.getFullYear();
+        previousmonth.getMonth() +
+        1 +
+        " " +
+        previousmonth.getDate() +
+        ", " +
+        previousmonth.getFullYear();
+
       var today = new Date(datestring);
+
       await fire
         .firestore()
         .collection("data")
         .where("userId", "==", userid)
         .where("isDeleted", "==", 0)
+        .where("createdAt", ">=", today)
         .onSnapshot((snapshot) => {
           var alldatatoday = snapshot.docs.map((doc) => ({
             id: doc.id,
             ...doc.data(),
           }));
+
           let sorteddata = alldatatoday
             .slice()
             .sort((a, b) => b.createdAt - a.createdAt);
@@ -378,7 +396,7 @@ function ExpenseData(props) {
       date.getMinutes();
     return datestring;
   }
-  return (
+  return fetched ? (
     <div className={classes.root}>
       <div>
         <div className={classes.apptitle}>
@@ -473,7 +491,9 @@ function ExpenseData(props) {
           <Dialog open={openadd} onClose={handleaddClose} maxWidth="xs">
             <DialogTitle>Add Expense</DialogTitle>
             <DialogContent>
-              <DialogContentText>Enter your Expenses to add you Expense sheet!</DialogContentText>
+              <DialogContentText>
+                Enter your Expenses to add you Expense sheet!
+              </DialogContentText>
               <form
                 className={classes.form}
                 onSubmit={(e) => e.preventDefault() && false}>
@@ -491,7 +511,6 @@ function ExpenseData(props) {
                       name: "age",
                       id: "outlined-age-native-simple",
                     }}>
-                    <option aria-label="None" value="" />
                     <option value={"Credit"}>Credit</option>
                     <option value={"Debit"}>Debit</option>
                   </Select>
@@ -607,7 +626,6 @@ function ExpenseData(props) {
                                   name: "age",
                                   id: "outlined-age-native-simple",
                                 }}>
-                                <option aria-label="None" value="" />
                                 <option value={"Credit"}>Credit</option>
                                 <option value={"Debit"}>Debit</option>
                               </Select>
@@ -720,6 +738,10 @@ function ExpenseData(props) {
           <h1 style={{ paddingTop: "50px" }}>No data!</h1>
         )}
       </div>
+    </div>
+  ) : (
+    <div id="loader">
+      <CircularProgress />
     </div>
   );
 }
