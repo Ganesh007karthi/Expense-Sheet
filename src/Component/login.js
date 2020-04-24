@@ -119,6 +119,7 @@ function Login(props) {
   async function login() {
     try {
       await fire.auth().signInWithEmailAndPassword(email, password);
+      localStorage.setItem('islogin', true);
       props.history.replace("/");
     } catch (error) {
       alert(error.message);
@@ -128,6 +129,7 @@ function Login(props) {
     try {
       var provider = new firebase.auth.GoogleAuthProvider();
       await fire.auth().signInWithPopup(provider);
+      localStorage.setItem('islogin', true);
       props.history.replace("/");
     } catch (error) {
       alert(error.message);

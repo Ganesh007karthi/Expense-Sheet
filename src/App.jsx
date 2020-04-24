@@ -17,6 +17,7 @@ class App extends Component {
     fire.auth().onAuthStateChanged((user) => {
       this.setState({ isSignedIn: !!user });
       this.setState({ user: user });
+      localStorage.setItem('islogin', false);
     });
   };
 
@@ -34,25 +35,12 @@ class App extends Component {
                 return this.state.isSignedIn === false ? (
                   <Login />
                 ) : (
-                  <HomePage />
+                  <Expensedata />
                 );
               }}
             />
             <Route exact path="/expense" component={HomePage} />
             <Route exact path="/resetpassword" component={Resetpassword} />
-            <Route
-              exact
-              path="/expensedata"
-              component={() => {
-                return this.state.isSignedIn === false ? (
-                  <div id="loader">
-                    <CircularProgress />
-                  </div>
-                ) : (
-                  <Expensedata />
-                );
-              }}
-            />
           </Switch>
         </Router>
       </MuiThemeProvider>
