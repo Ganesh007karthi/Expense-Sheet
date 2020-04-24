@@ -21,7 +21,7 @@ import {
   CardContent,
   Grid,
 } from "@material-ui/core";
-import Box from "@material-ui/core/Box"
+import Box from "@material-ui/core/Box";
 import Datepicker from "react-datepicker";
 import EditIcon from "@material-ui/icons/Edit";
 import DeleteIcon from "@material-ui/icons/Delete";
@@ -48,6 +48,7 @@ const styles = (theme) => ({
     marginTop: theme.spacing.unit * 5,
     marginLeft: "auto",
     marginRight: "auto",
+    marginBottom: theme.spacing.unit * 30,
     display: "flex",
     flexDirection: "column",
     alignItems: "center",
@@ -72,7 +73,6 @@ const styles = (theme) => ({
   },
   filterby: {
     float: "left",
-    
   },
   bullet: {
     display: "inline-block",
@@ -101,12 +101,13 @@ const styles = (theme) => ({
 });
 function ExpenseData(props) {
   const { classes } = props;
-  const [alldata, setalldata] = useState([]);
+  const [selecteddata, setselecteddata] = useState([]);
   const [filterby, setfilterby] = useState("All");
   const [fetched, setfetched] = useState(false);
   const [data, setdata] = useState([]);
   const [open, setOpen] = useState(false);
   const [openadd, setOpenadd] = useState(false);
+  const [opendelete,setOpendelete] = useState(false);
   const [amount, setamount] = useState(0);
   const [description, setdescription] = useState("");
   const [selectedDate, setSelectedDate] = useState(new Date());
@@ -114,6 +115,7 @@ function ExpenseData(props) {
   const [totalallcredit, settotalallcredit] = useState(0);
   const [totalalldebit, settotalalldebit] = useState(0);
   const [updateid, setupdateid] = useState("");
+  const [deleteid,setdeleteid] = useState("");
 
   useEffect(() => {
     if (fire.auth().onAuthStateChanged) {
@@ -131,39 +133,43 @@ function ExpenseData(props) {
         .where("isDeleted", "==", 0)
         .where("createdAt", ">", today)
         .onSnapshot((snapshot) => {
-          const alldata = snapshot.docs.map((doc) => ({
+          const alldatatoday = snapshot.docs.map((doc) => ({
             id: doc.id,
             ...doc.data(),
           }));
-          let sorteddata = alldata
+          let sorteddata = alldatatoday
             .slice()
             .sort((a, b) => b.createdAt - a.createdAt);
           setdata(sorteddata);
           setfetched(true);
         });
     }
-    totalCredit(alldata);
-    totalDebit(alldata);
+    totalCredit(data);
+    totalDebit(data);
     filter();
   }, [fetched, filterby]);
-  async function handleClickOpen() {
-    setOpen(true);
-  }
   async function handleClickOpenAddExpense() {
+    setamount(0);
+    setdescription("");
+    setamountType("Debit");
+    setSelectedDate(new Date());
     setOpenadd(true);
   }
 
-  async function deletedata(id, userid, data1) {
-    data1.isDeleted = 1;
-    await fire.firestore().collection("data").doc(id).update(data1);
-    console.log(id);
+  async function handledeleteOpen(id,data){
+      setdeleteid(id);
+      setselecteddata(data);
+      setOpendelete(true);
+  }
+  async function deletedata() {
+    var id=deleteid;
+    selecteddata.isDeleted = 1;
+    fire.firestore().collection("data").doc(id).update(selecteddata);
+    setOpendelete(false);
     filter();
-    alert("deleted");
   }
   async function update(index, id, onservercreatedAt, userid) {
     setOpen(false);
-    console.log(updateid);
-    console.log(index);
     var data = {
       amountType: amountType,
       amount: amount,
@@ -176,7 +182,7 @@ function ExpenseData(props) {
     };
     var id = updateid;
 
-    await fire.firestore().collection("data").doc(updateid).update(data);
+    fire.firestore().collection("data").doc(updateid).update(data);
     setamount(0);
     setamountType("Credit");
     setdescription("");
@@ -197,10 +203,9 @@ function ExpenseData(props) {
         userId: userid,
         isDeleted: 0,
       };
-      console.log(data);
-      await fire.firestore().collection("data").add(data);
-      await filter();
+      fire.firestore().collection("data").add(data);
       setOpenadd(false);
+      await filter();
     } catch (error) {
       alert(error.message);
     }
@@ -209,15 +214,15 @@ function ExpenseData(props) {
     setOpen(false);
   };
 
+  const handleDeleteClose =()=>{
+    setOpendelete(false);
+  }
   const handleaddClose = () => {
     setOpenadd(false);
   };
-  async function summa(id, datamap) {
-    console.log(id);
-    console.log(datamap);
+  async function openupdateform(id, datamap) {
     await setdatainupdateform(datamap);
     setOpen(true);
-    console.log(selectedDate);
     setupdateid(id);
   }
   async function setdatainupdateform(data_submit) {
@@ -225,14 +230,8 @@ function ExpenseData(props) {
     setamountType(data_submit.amountType);
     var timestamp = data_submit.createdAt.seconds * 1000;
     var date = new Date(timestamp);
-    console.log(date);
     await setSelectedDate(date);
     setdescription(data_submit.description);
-    // console.log(amount);
-    // console.log(amountType);
-    // console.log(description);
-    console.log(data_submit);
-    console.log(amount);
     return;
   }
 
@@ -338,9 +337,9 @@ function ExpenseData(props) {
     }
   }
 
-  async function totalCredit(alldata) {
+  async function totalCredit(data_value) {
     var totalcredit = 0;
-    alldata.map((eachdata) => {
+    data_value.map((eachdata) => {
       if (eachdata.amountType == "Credit") {
         if (eachdata.amount.indexOf(".") > -1) {
         } else {
@@ -351,9 +350,9 @@ function ExpenseData(props) {
     });
     settotalallcredit(totalcredit);
   }
-  async function totalDebit(alldata) {
+  async function totalDebit(data_value) {
     var totaldebit = 0;
-    alldata.map((eachdata) => {
+    data_value.map((eachdata) => {
       if (eachdata.amountType == "Debit") {
         if (eachdata.amount.indexOf(".") > -1) {
         } else {
@@ -365,13 +364,20 @@ function ExpenseData(props) {
     settotalalldebit(totaldebit);
   }
 
-  function getdate(time){
-    console.log(time);
-    var date= new Date(time * 1000);
-    let datestring = date.getDate()+"-"+(date.getMonth()+1)+"-"+date.getFullYear()+" \t  "+date.getHours()+":"+date.getMinutes();
-    return datestring
+  function getdate(time) {
+    var date = new Date(time * 1000);
+    let datestring =
+      date.getDate() +
+      "-" +
+      (date.getMonth() + 1) +
+      "-" +
+      date.getFullYear() +
+      " \t  " +
+      date.getHours() +
+      ":" +
+      date.getMinutes();
+    return datestring;
   }
-  // console.log(data)
   return fetched ? (
     <div className={classes.root}>
       <div>
@@ -437,15 +443,14 @@ function ExpenseData(props) {
         </Grid>
       </div>
       <div className={classes.expenseform}>
-        <div className={classes.filterby} >
-          <FormControl style={{marginRight:"40px",marginBottom:"20px"}}>
+        <div className={classes.filterby}>
+          <FormControl style={{ marginRight: "40px", marginBottom: "20px" }}>
             <InputLabel>Filter By</InputLabel>
             <Select
               className={classes.filterby}
               native
               value={filterby}
               autoFocus
-              
               onChange={(e) => {
                 setfilterby(e.target.value);
               }}
@@ -457,7 +462,7 @@ function ExpenseData(props) {
             </Select>
           </FormControl>
           <Button
-          style={{marginTop:"10px"}}
+            style={{ marginTop: "10px" }}
             onClick={() => {
               handleClickOpenAddExpense();
             }}
@@ -472,10 +477,6 @@ function ExpenseData(props) {
               <form
                 className={classes.form}
                 onSubmit={(e) => e.preventDefault() && false}>
-                <Typography component="h2" variant="h6">
-                  {" "}
-                  Enter Your Expenses Here!!
-                </Typography>
                 <FormControl className={classes.formControl} fullWidth>
                   <InputLabel htmlFor="outlined-age-native-simple">
                     Type
@@ -573,7 +574,7 @@ function ExpenseData(props) {
                       <IconButton
                         onClick={() => {
                           // handleClickOpen();
-                          summa(eachdata.id, eachdata);
+                          openupdateform(eachdata.id, eachdata);
                         }}>
                         <EditIcon color="primary" />
                       </IconButton>
@@ -682,10 +683,31 @@ function ExpenseData(props) {
                       </Dialog>
                       <IconButton
                         onClick={() =>
-                          deletedata(eachdata.id, eachdata.userId, eachdata)
+                          handledeleteOpen(eachdata.id,eachdata)
                         }>
                         <DeleteIcon color="primary" />
                       </IconButton>
+                      <Dialog
+                      open={opendelete}
+                      onClose={handleDeleteClose}
+                      aria-labelledby="alert-dialog-title"
+                      aria-describedby="alert-dialog-description"
+                    >
+                      <DialogTitle >Alert</DialogTitle>
+                      <DialogContent>
+                        <DialogContentText id="alert-dialog-description">
+                         Are you sure to Delete this Expense?
+                        </DialogContentText>
+                      </DialogContent>
+                      <DialogActions>
+                        <Button onClick={handleClose} color="primary">
+                          Disagree
+                        </Button>
+                        <Button onClick={()=>{deletedata()}} color="primary" autoFocus>
+                          Agree
+                        </Button>
+                      </DialogActions>
+                    </Dialog>
                     </TableCell>
                   </TableRow>
                 ))}
@@ -693,7 +715,7 @@ function ExpenseData(props) {
             </Table>
           </TableContainer>
         ) : (
-          <h1>No data!</h1>
+          <h1 style={{ paddingTop: "50px" }}>No data!</h1>
         )}
       </div>
     </div>

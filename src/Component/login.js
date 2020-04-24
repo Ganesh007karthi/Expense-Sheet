@@ -1,5 +1,7 @@
-import React, { useState } from "react";
+import React, { useState ,useContext } from "react";
 import withStyles from "@material-ui/core/styles/withStyles";
+import {AuthContext} from "./Auth"
+import Expensedata from "./expensedata"
 import {
   Paper,
   Typography,
@@ -50,71 +52,77 @@ function Login(props) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-  return (
-    <div className={classes.root}>
-      <Typography component="h1" variant="h4">
-        Expense Sheet
-      </Typography>
-      <Paper className={classes.login} elevation={3}>
-        <Typography component="h1" variant="h5">
-          Sign in
+  const { currentUser } = useContext(AuthContext);
+  if(currentUser){
+    return (<Expensedata/>)
+  }else{
+    return (
+      <div className={classes.root}>
+        <Typography component="h1" variant="h4">
+          Expense Sheet
         </Typography>
-        <form
-          className={classes.form}
-          onSubmit={(e) => e.preventDefault() && false}>
-          <FormControl margin="normal" required fullWidth>
-            <InputLabel htmlfor="email">Email Address</InputLabel>
-            <Input
-              id="email"
-              name="email"
-              autoComplete="off"
-              autoFocus
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-            />
-          </FormControl>
-          <FormControl margin="normal" required fullWidth>
-            <InputLabel htmlfor="password">Password</InputLabel>
-            <Input
-              id="password"
-              type="password"
-              name="password"
-              autoComplete="off"
-              autoFocus
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-            />
-          </FormControl>
-          <Button component={Link} to="/resetpassword" color="primary">
-            Forget password?
-          </Button>
-          <br></br>
-          <Button
-            type="submit"
-            variant="contained"
-            color="primary"
-            onClick={login}
-            className={classes.submit}>
+        <Paper className={classes.login} elevation={3}>
+          <Typography component="h1" variant="h5">
             Sign in
-          </Button>
-          <Typography>
-            New to Expense sheet?
-            <Button component={Link} to="/signup" color="primary">
-              {" "}
-              Sign up
-            </Button>
           </Typography>
-          <Typography>or connect with</Typography>
-          <GoogleButton
-            className={classes.googlebtn}
-            onClick={() => {
-              googlesignin();
-            }}
-          />
-        </form>
-      </Paper>
-    </div>
-  );
+          <form
+            className={classes.form}
+            onSubmit={(e) => e.preventDefault() && false}>
+            <FormControl margin="normal" required fullWidth>
+              <InputLabel htmlfor="email">Email Address</InputLabel>
+              <Input
+                id="email"
+                name="email"
+                autoComplete="off"
+                autoFocus
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+              />
+            </FormControl>
+            <FormControl margin="normal" required fullWidth>
+              <InputLabel htmlfor="password">Password</InputLabel>
+              <Input
+                id="password"
+                type="password"
+                name="password"
+                autoComplete="off"
+                autoFocus
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+              />
+            </FormControl>
+            <Button component={Link} to="/resetpassword" color="primary">
+              Forget password?
+            </Button>
+            <br></br>
+            <Button
+              type="submit"
+              variant="contained"
+              color="primary"
+              onClick={login}
+              className={classes.submit}>
+              Sign in
+            </Button>
+            <Typography>
+              New to Expense sheet?
+              <Button component={Link} to="/signup" color="primary">
+                {" "}
+                Sign up
+              </Button>
+            </Typography>
+            <Typography>or connect with</Typography>
+            <GoogleButton
+              className={classes.googlebtn}
+              onClick={() => {
+                googlesignin();
+              }}
+            />
+          </form>
+        </Paper>
+      </div>
+    );
+  }
+ 
 
   async function login() {
     try {
