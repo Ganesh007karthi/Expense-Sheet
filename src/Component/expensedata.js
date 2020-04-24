@@ -107,7 +107,7 @@ function ExpenseData(props) {
   const [data, setdata] = useState([]);
   const [open, setOpen] = useState(false);
   const [openadd, setOpenadd] = useState(false);
-  const [opendelete,setOpendelete] = useState(false);
+  const [opendelete, setOpendelete] = useState(false);
   const [amount, setamount] = useState(0);
   const [description, setdescription] = useState("");
   const [selectedDate, setSelectedDate] = useState(new Date());
@@ -115,7 +115,7 @@ function ExpenseData(props) {
   const [totalallcredit, settotalallcredit] = useState(0);
   const [totalalldebit, settotalalldebit] = useState(0);
   const [updateid, setupdateid] = useState("");
-  const [deleteid,setdeleteid] = useState("");
+  const [deleteid, setdeleteid] = useState("");
 
   useEffect(() => {
     if (fire.auth().onAuthStateChanged) {
@@ -156,13 +156,13 @@ function ExpenseData(props) {
     setOpenadd(true);
   }
 
-  async function handledeleteOpen(id,data){
-      setdeleteid(id);
-      setselecteddata(data);
-      setOpendelete(true);
+  async function handledeleteOpen(id, data) {
+    setdeleteid(id);
+    setselecteddata(data);
+    setOpendelete(true);
   }
   async function deletedata() {
-    var id=deleteid;
+    var id = deleteid;
     selecteddata.isDeleted = 1;
     fire.firestore().collection("data").doc(id).update(selecteddata);
     setOpendelete(false);
@@ -214,9 +214,9 @@ function ExpenseData(props) {
     setOpen(false);
   };
 
-  const handleDeleteClose =()=>{
+  const handleDeleteClose = () => {
     setOpendelete(false);
-  }
+  };
   const handleaddClose = () => {
     setOpenadd(false);
   };
@@ -378,7 +378,7 @@ function ExpenseData(props) {
       date.getMinutes();
     return datestring;
   }
-  return fetched ? (
+  return (
     <div className={classes.root}>
       <div>
         <div className={classes.apptitle}>
@@ -470,10 +470,10 @@ function ExpenseData(props) {
             color="primary">
             Add Expenses
           </Button>
-          <Dialog open={openadd} onClose={handleaddClose}>
+          <Dialog open={openadd} onClose={handleaddClose} maxWidth="xs">
             <DialogTitle>Add Expense</DialogTitle>
             <DialogContent>
-              <DialogContentText>Add your Expense Data.</DialogContentText>
+              <DialogContentText>Enter your Expenses to add you Expense sheet!</DialogContentText>
               <form
                 className={classes.form}
                 onSubmit={(e) => e.preventDefault() && false}>
@@ -682,32 +682,34 @@ function ExpenseData(props) {
                         </DialogActions>
                       </Dialog>
                       <IconButton
-                        onClick={() =>
-                          handledeleteOpen(eachdata.id,eachdata)
-                        }>
+                        onClick={() => handledeleteOpen(eachdata.id, eachdata)}>
                         <DeleteIcon color="primary" />
                       </IconButton>
                       <Dialog
-                      open={opendelete}
-                      onClose={handleDeleteClose}
-                      aria-labelledby="alert-dialog-title"
-                      aria-describedby="alert-dialog-description"
-                    >
-                      <DialogTitle >Alert</DialogTitle>
-                      <DialogContent>
-                        <DialogContentText id="alert-dialog-description">
-                         Are you sure to Delete this Expense?
-                        </DialogContentText>
-                      </DialogContent>
-                      <DialogActions>
-                        <Button onClick={handleClose} color="primary">
-                          Disagree
-                        </Button>
-                        <Button onClick={()=>{deletedata()}} color="primary" autoFocus>
-                          Agree
-                        </Button>
-                      </DialogActions>
-                    </Dialog>
+                        open={opendelete}
+                        onClose={handleDeleteClose}
+                        aria-labelledby="alert-dialog-title"
+                        aria-describedby="alert-dialog-description">
+                        <DialogTitle>Alert</DialogTitle>
+                        <DialogContent>
+                          <DialogContentText id="alert-dialog-description">
+                            Are you sure to Delete this Expense?
+                          </DialogContentText>
+                        </DialogContent>
+                        <DialogActions>
+                          <Button onClick={handleClose} color="primary">
+                            Disagree
+                          </Button>
+                          <Button
+                            onClick={() => {
+                              deletedata();
+                            }}
+                            color="primary"
+                            autoFocus>
+                            Agree
+                          </Button>
+                        </DialogActions>
+                      </Dialog>
                     </TableCell>
                   </TableRow>
                 ))}
@@ -718,10 +720,6 @@ function ExpenseData(props) {
           <h1 style={{ paddingTop: "50px" }}>No data!</h1>
         )}
       </div>
-    </div>
-  ) : (
-    <div id="loader">
-      <CircularProgress />
     </div>
   );
 }
